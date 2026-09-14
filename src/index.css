@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --ink: #1c1b19;
+  --paper: #fbf3e4;
+  --sand: #f2ead9;
+  --teal: #0f5257;
+  --teal-deep: #0a3a3e;
+  --amber: #ef8b2c;
+  --amber-deep: #c96f1a;
+  --gold: #d4af37;
+  --line: #d8cdb4;
+}
+
+body {
+  background: var(--sand);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: 'Fraunces', serif;
+}
+
+.font-mono-num {
+  font-family: 'Space Mono', monospace;
+}
+
+/* Perforated edge used along ticket-stub dividers */
+.perforated {
+  background-image: radial-gradient(circle, var(--sand) 2.5px, transparent 2.6px);
+  background-size: 14px 14px;
+  background-position: center;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+@keyframes number-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
