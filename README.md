@@ -1,16 +1,33 @@
-# React + Vite
+# 🎉 Tambola Time! 🎟️
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Welcome to my **vibe-coded Tambola app** — built with good vibes, questionable amounts of coffee, and a strong belief that every number deserves its moment in the spotlight. 😄
 
-Currently, two official plugins are available:
+Whether you're a seasoned Tambola champion or someone who just came here for the snacks, **everyone is welcome to join the fun!**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 How to Play
 
-## React Compiler
+1. Grab your Tambola ticket.
+2. Get comfortable.
+3. Start the game.
+4. Keep your eyes peeled for your numbers.
+5. Shout your victory claim with confidence!
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+May the numbers be ever in your favour. 🍀
 
-## Expanding the Oxlint configuration
+## 🐛 Fun Disclaimer
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+This app was lovingly created through the ancient art of **vibe coding**.
+
+That means bugs may occasionally appear, numbers may develop personalities, and the app might do something delightfully unexpected.
+
+By playing, you agree that:
+
+> Any bugs, glitches, missing numbers, dramatic pauses, or suspiciously lucky wins are entirely your responsibility. 😜
+
+No bugs were harmed during development. Most of them simply became features.
+
+## 🎊 Come Join the Fun!
+
+Invite your friends, family, colleagues, neighbours, and that one person who always wins everything.
+
+Let the Tambola games begin! 🎉
