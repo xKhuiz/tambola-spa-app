@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { doc, onSnapshot, collection, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { getStoredPlayerId } from "../lib/players";
+import { usePlayerAuth } from "../hooks/usePlayerAuth";
 import { unflattenGrid } from "../lib/ticket";
 import { primeAudio } from "../lib/audio";
 import { useAnnounceNumber } from "../hooks/useAnnounceNumber";
@@ -14,17 +14,20 @@ import Confetti from "../components/Confetti";
 export default function PlayGamePage() {
   const { roomId } = useParams();
   const navigate = useNavigate();
-  const playerId = getStoredPlayerId(roomId);
+  const { uid, loading: authLoading } = usePlayerAuth();
 
   const [game, setGame] = useState(undefined);
   const [tickets, setTickets] = useState([]);
   const [audioOn, setAudioOn] = useState(true);
 
   useEffect(() => {
-    if (!playerId) {
+    // Wait for anonymous auth to actually resolve before deciding there's
+    // no identity — uid starts null for a moment on every load.
+    if (authLoading) return;
+    if (!uid) {
       navigate(`/play/${roomId}`);
     }
-  }, [playerId, roomId, navigate]);
+  }, [uid, authLoading, roomId, navigate]);
 
   useEffect(() => {
     const ref = doc(db, "games", roomId);
@@ -33,10 +36,10 @@ export default function PlayGamePage() {
   }, [roomId]);
 
   useEffect(() => {
-    if (!playerId) return;
+    if (!uid) return;
     const q = query(
       collection(db, "games", roomId, "tickets"),
-      where("ownerId", "==", playerId)
+      where("ownerId", "==", uid)
     );
     // A fresh onSnapshot subscription here is what makes reconnects work:
     // if the tab loses network or gets backgrounded and comes back, this
@@ -46,7 +49,7 @@ export default function PlayGamePage() {
       setTickets(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
     return unsub;
-  }, [roomId, playerId]);
+  }, [roomId, uid]);
 
   useEffect(() => {
     if (game && game.status === "ended") {

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { doc, onSnapshot, collection, query, orderBy } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { getStoredPlayerId, joinGame, isValidIndianPhone } from "../lib/players";
+import { usePlayerAuth } from "../hooks/usePlayerAuth";
+import { getExistingPlayer, joinGame, isValidIndianPhone } from "../lib/players";
 import { requestTickets } from "../lib/tickets";
 import { unflattenGrid } from "../lib/ticket";
 import TicketGrid from "../components/TicketGrid";
@@ -10,9 +11,11 @@ import TicketGrid from "../components/TicketGrid";
 export default function PlayPage() {
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const { uid, loading: authLoading, error: authError } = usePlayerAuth();
 
   const [game, setGame] = useState(undefined); // undefined = loading, null = not found
-  const [playerId, setPlayerId] = useState(() => getStoredPlayerId(roomId));
+  // undefined = still checking Firestore, null = not joined yet, object = joined
+  const [existingPlayer, setExistingPlayer] = useState(undefined);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [joining, setJoining] = useState(false);
@@ -36,11 +39,18 @@ export default function PlayPage() {
     return unsub;
   }, [roomId]);
 
+  // Once we have a real (anonymous) Firebase identity, check whether this
+  // uid already joined this room before — a reconnect, not a fresh join.
+  useEffect(() => {
+    if (!uid) return;
+    getExistingPlayer(roomId, uid).then((p) => setExistingPlayer(p));
+  }, [roomId, uid]);
+
   // Subscribe to the full ticket pool for this room, so players can browse
   // and choose specific tickets — including ones already taken, so we can
   // show them as booked rather than offer them.
   useEffect(() => {
-    if (!playerId) return;
+    if (!uid) return;
     const q = query(
       collection(db, "games", roomId, "tickets"),
       orderBy("ticketNumber")
@@ -49,7 +59,7 @@ export default function PlayPage() {
       setAllTickets(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
     return unsub;
-  }, [roomId, playerId]);
+  }, [roomId, uid]);
 
   // Once the host starts the game, move players to the live game screen.
   useEffect(() => {
@@ -59,12 +69,12 @@ export default function PlayPage() {
   }, [game, roomId, navigate]);
 
   const myBookedTickets = useMemo(
-    () => allTickets.filter((t) => t.ownerId === playerId && t.status === "booked"),
-    [allTickets, playerId]
+    () => allTickets.filter((t) => t.ownerId === uid && t.status === "booked"),
+    [allTickets, uid]
   );
   const myPendingTickets = useMemo(
-    () => allTickets.filter((t) => t.ownerId === playerId && t.status === "pending"),
-    [allTickets, playerId]
+    () => allTickets.filter((t) => t.ownerId === uid && t.status === "pending"),
+    [allTickets, uid]
   );
 
   async function handleJoin(e) {
@@ -80,8 +90,8 @@ export default function PlayPage() {
     }
     setJoining(true);
     try {
-      const id = await joinGame(roomId, name, phone);
-      setPlayerId(id);
+      await joinGame(roomId, uid, name, phone);
+      setExistingPlayer({ name: name.trim(), phone, ticketIds: [] });
     } catch (err) {
       console.error(err);
       setJoinError("Couldn't join the room. Try again.");
@@ -103,7 +113,7 @@ export default function PlayPage() {
     setBookError("");
     setBooking(true);
     try {
-      await requestTickets(roomId, playerId, name || "Player", [...selected]);
+      await requestTickets(roomId, uid, existingPlayer?.name || "Player", [...selected]);
       setSelected(new Set());
     } catch (err) {
       setBookError(err.message || "Couldn't request those tickets. Try again.");
@@ -112,7 +122,11 @@ export default function PlayPage() {
     }
   }
 
-  if (game === undefined) {
+  if (authError) {
+    return <CenteredMessage title="Connection problem" text={authError} />;
+  }
+
+  if (game === undefined || authLoading || existingPlayer === undefined) {
     return <CenteredMessage text="Loading room…" />;
   }
 
@@ -125,7 +139,7 @@ export default function PlayPage() {
     );
   }
 
-  if (!playerId) {
+  if (!existingPlayer) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6">
         <p className="text-sm uppercase tracking-wide text-[var(--ink)]/40 mb-1">
@@ -214,7 +228,7 @@ export default function PlayPage() {
             {allTickets
               .slice((page - 1) * TICKETS_PER_PAGE, page * TICKETS_PER_PAGE)
               .map((t) => {
-                const isMine = t.ownerId === playerId;
+                const isMine = t.ownerId === uid;
                 const isMinePending = isMine && t.status === "pending";
                 const isMineBooked = isMine && t.status === "booked";
                 const isTakenByOther = t.ownerId && !isMine;

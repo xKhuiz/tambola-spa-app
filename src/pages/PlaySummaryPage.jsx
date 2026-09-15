@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { doc, onSnapshot, collection, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { getStoredPlayerId } from "../lib/players";
+import { usePlayerAuth } from "../hooks/usePlayerAuth";
 import { randomQuote } from "../lib/quotes";
 import { unflattenGrid } from "../lib/ticket";
 import { awardPatternNumbers } from "../lib/awards";
@@ -11,7 +11,7 @@ import Confetti from "../components/Confetti";
 
 export default function PlaySummaryPage() {
   const { roomId } = useParams();
-  const playerId = getStoredPlayerId(roomId);
+  const { uid } = usePlayerAuth();
   const quote = useMemo(() => randomQuote(), []);
 
   const [game, setGame] = useState(undefined);
@@ -26,16 +26,16 @@ export default function PlaySummaryPage() {
   }, [roomId]);
 
   useEffect(() => {
-    if (!playerId) return;
+    if (!uid) return;
     const q = query(
       collection(db, "games", roomId, "tickets"),
-      where("ownerId", "==", playerId)
+      where("ownerId", "==", uid)
     );
     const unsub = onSnapshot(q, (snap) => {
       setTickets(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
     return unsub;
-  }, [roomId, playerId]);
+  }, [roomId, uid]);
 
   const calledSet = useMemo(() => new Set(game?.calledNumbers || []), [game]);
   const awardsByType = useMemo(() => {

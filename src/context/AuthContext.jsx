@@ -14,7 +14,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
+      // Players sign in anonymously (see hooks/usePlayerAuth). That's a
+      // real Firebase user, but it must never count as a signed-in HOST —
+      // otherwise a player's browser could silently unlock host-only
+      // routes. Only a real (Google) identity counts here.
+      setUser(firebaseUser && !firebaseUser.isAnonymous ? firebaseUser : null);
       setLoading(false);
     });
     return unsubscribe;

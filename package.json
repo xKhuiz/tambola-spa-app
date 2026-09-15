@@ -3,14 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
+  "scripts": 
+  {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "shx cp dist/index.html dist/404.html",
     "lint": "oxlint",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "postbuild": "copy /Y dist\\index.html dist\\404.html",
-    "deploy": "gh-pages -d dist"
+    "preview": "vite preview"
   },
   "dependencies": {
     "firebase": "^12.19.0",
@@ -27,6 +26,7 @@
     "gh-pages": "^6.3.0",
     "oxlint": "^1.81.0",
     "postcss": "^8.5.28",
+    "shx": "^0.4.0",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.0"
   }
