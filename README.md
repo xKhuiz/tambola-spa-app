@@ -24,7 +24,7 @@ By playing, you agree that:
 
 > Any bugs, glitches, missing numbers, dramatic pauses, or suspiciously lucky wins are entirely your responsibility. 😜
 
-No bugs were harmed during development. Most of them simply became features.
+No bugs were harmed during development. Most of them simply became features. '-'
 
 ## 🎊 Come Join the Fun!
 
